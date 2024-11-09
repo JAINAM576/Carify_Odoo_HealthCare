@@ -21,10 +21,13 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import Login from "./Pages/App/Login/Login";
 import Signup from './Pages/App/Signup/Signup';
-
+import Chatbot from './Pages/App/Chatbot/Chatbot';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
-
+import ReportAnalysis from './Pages/App/Report-analysis/reportAnalysis';
+import Profle from './Pages/App/Profile/Profile'
+import Schedule from './Pages/App/Schedule/Schecule';
+import Dashboard from './Pages/App/Dashboard/Dashboard';
 
 
 // router and routes
@@ -38,12 +41,7 @@ const router = createBrowserRouter([
         path: "/",
         
         element: <Home />,
-        children:[
-          {
-        path: "/assessment",
-        element: <PHQ9Assessment />,
-      },
-        ]
+       
       },
       {
         path: "/login",
@@ -51,12 +49,40 @@ const router = createBrowserRouter([
         element: <Login />,
       },
       {
+        path: "/mental-test",
+        element: <PHQ9Assessment />,
+      },
+      {
         path: "/signup",
         index: true,
         element: <Signup />,
       },
        
-
+      {
+        path: "/chatbot",
+        index: true,
+        element: <Chatbot />,
+      },
+      {
+        path: "/report-analysis",
+        index: true,
+        element: <ReportAnalysis />,
+      },
+      {
+        path: "/profile/patient",
+        index: true,
+        element: <Profle />,
+      },
+      {
+        path: "/schedule",
+        index: true,
+        element: <Schedule />,
+      },
+      {
+        path: "/dashboard",
+        index: true,
+        element: <Dashboard />,
+      },
       {
         path: "*",
         element: <Error_404 />

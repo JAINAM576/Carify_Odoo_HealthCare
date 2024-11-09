@@ -70,6 +70,127 @@ body {
 .btn-close{
     margin-right: 5px !important;
 }
+
+.chatbotdiv {
+    height: 70vh;
+    width: 100%;
+    min-height: 400px;  
+    border-radius: 8px;
+    background-color: var(--Carify-gray);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; 
+    align-items: flex-start;
+    padding: 10px;
+}
+
+
+
+.chat {
+    height: calc(70vh - 80px);
+    padding-bottom: 200px;
+    overflow-y: scroll;
+    width: 100%;
+}
+.patientchatdiv{
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    margin-top: 20px;
+}
+.patientchat {
+    max-width: 60%;
+    background-color: var(--Carify-white);
+    padding: 8px 16px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    border-radius: 4px;
+    position: relative;
+    margin-right: 80px;
+}
+
+.patientchat::after {
+    content: ""; /* Necessary to display the pseudo-element */
+    position: absolute;
+    height: 40px;
+    width: 50px; /* Adjust width as needed for the image */
+    top: 2px;
+    right: -60px; /* Distance from the right edge */
+    background-image: url('./Pages/App/Home/patient.png');
+    background-size: contain; /* Ensure the image scales correctly */
+    background-repeat: no-repeat; /* Avoid repeating the image */
+    background-position: center center; /* Center the image */
+    border-radius: 100%;
+}
+.botchatdiv{
+    width: 100%;
+    display: flex;
+    justify-content: start;
+    margin-top: 20px;
+}
+.botchat {
+    max-width: 60%;
+    background-color: var(--Carify-white);
+    padding: 8px 16px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    border-radius: 4px;
+    position: relative;
+    margin-left: 80px;
+}
+
+.botchat::after {
+    content: ""; /* Necessary to display the pseudo-element */
+    position: absolute;
+    height: 40px;
+    width: 50px; /* Adjust width as needed for the image */
+    top: 2px;
+    left: -60px; /* Distance from the right edge */
+    background-image: url('./Pages/App/Home/robo.png');
+    background-size: contain; /* Ensure the image scales correctly */
+    background-repeat: no-repeat; /* Avoid repeating the image */
+    background-position: center center; /* Center the image */
+    border-radius: 100%;
+}
+.search-container {
+    display: flex;
+    width: 100%;
+
+}
+
+.searchbar {
+    background-color: var(--Carify-white);
+    height: 80px;
+    width: 90%;               /* Adjust width for layout */
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    border-radius: 4px 0 0 4px;  /* Rounded left corners */
+    padding: 5px;
+    margin-right: 10px;
+}
+
+.searchbutton {
+    background-color: var(--Carify-blue);
+    height: 80px;
+    width: 10%;               /* Adjust width for layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--Carify-white);
+    border-radius: 0 4px 4px 0; /* Rounded right corners */
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+.mydiv{
+    background-color: #f5f5f5;
+    padding: 24px 36px;
+    border-radius: 8px;
+    border: 1px solid var(--Carify-black);
+}
+
+
+
 @media screen and (max-width: 1200px) {
 
 

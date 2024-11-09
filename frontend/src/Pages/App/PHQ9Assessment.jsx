@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import Patientnav from "../App/Components/patientnav";
 const PHQ9Assessment = () => {
     const questions = [
         "Little interest or pleasure in doing things",
@@ -110,6 +110,8 @@ const calculateSeverity = (totalScore) => {
     const results = calculateScore();
 
     return (
+        <>
+        <Patientnav activeName="Mental-test"/>
         <div className="container my-5">
             <h2 className="mb-4 text-center">PHQ-9 Assessment</h2>
             <p className="text-center mb-4">Over the last 2 weeks, how often have you been bothered by any of the following problems?</p>
@@ -219,8 +221,10 @@ const calculateSeverity = (totalScore) => {
                         </div>
                     </div>
                 </div>
+                
             )}
         </div>
+        </>
     );
 };
 
