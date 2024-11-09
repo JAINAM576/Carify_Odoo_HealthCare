@@ -1,0 +1,45 @@
+#root {
+  --b: #5183EF;
+  --w: #ffffff;
+  --s: 2s;
+  /* change speed */
+}
+
+.body>*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  transform-style: preserve-3d;
+}
+
+
+.body {
+  margin: 0;
+  padding: 0;
+  width: 100svw;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  overflow: hidden;
+  z-index: 999;
+  background: var(--b);
+}
+
+.body>h3 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  color: #ffffff;
+  margin: 20px;
+  transform: translateY(-10%);
+}
+
+.content {
+  width: 50vmin;
+  height: 50vmin;
+  perspective: 1000vmin;
+}

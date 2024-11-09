@@ -1,0 +1,5 @@
+Django
+djongo
+djangorestframework
+google-generativeai
+pymongo
