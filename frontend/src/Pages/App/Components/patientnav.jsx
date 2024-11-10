@@ -1,4 +1,5 @@
 import user_profile from '../Home/patient.png'
+import React from 'react';
 const Nav = ({ activeName }) => {
     return (
         <>

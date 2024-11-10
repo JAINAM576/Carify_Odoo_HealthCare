@@ -10,7 +10,7 @@ import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 // Main component
-const DoctorTable = ({ doctors }) => {
+const PatientTable = ({ doctors }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [historyModalVisible, setHistoryModalVisible] = useState(false);
@@ -169,13 +169,22 @@ const doctorsData = [
   },
 ];
 
-const App = () => {
+const App = ({doctors}) => {
   return (
     <div>
-      <h1>Doctor and Patient History</h1>
-      <DoctorTable doctors={doctorsData} />
+      <PatientTable doctors={doctors} />
     </div>
   );
 };
 
 export default App;
+
+// import React from 'react'
+
+// const PatieantDatatable = () => {
+//   return (
+//     <div>PatieantDatatable</div>
+//   )
+// }
+
+// export default PatieantDatatable

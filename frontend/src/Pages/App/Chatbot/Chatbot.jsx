@@ -1,12 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Patientnav from "../Components/patientnav";
+import { useNavigate } from "react-router-dom";
 
 const Chatbot = () => {
+    const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [inputText, setInputText] = useState("");
     const [chatHistory, setChatHistory] = useState([
-        { sender: "bot", message: "Hi, I am your consultant for today. Can you tell me how you feel today so I can help you further in life." }
+        { sender: "bot", message: "Hi, I am your consultant for today. Can you tell me how you feel today so I can help you further in life?" }
     ]);
+
+    // Authentication check (runs only once on component mount)
+    useEffect(() => {
+        const checkCookies = () => {
+            const cookies = document.cookie.split('; ');
+            const email = cookies.find(cookie => cookie.startsWith('email='));
+            const role = cookies.find(cookie => cookie.startsWith('role='));
+            const password = cookies.find(cookie => cookie.startsWith('password='));
+
+            // Check if all necessary cookies exist
+            if (email && role && password) {
+                setIsAuthenticated(true);
+            } else {
+                navigate('/login'); // Redirect to the login page if not authenticated
+            }
+        };
+
+        checkCookies();
+    }, [navigate]); // Only run on mount
+
+    // Don't render the chatbot UI until authentication is verified
+    if (!isAuthenticated) {
+        return <div>Loading...</div>;  // Show a loading state until authentication is checked
+    }
 
     const handleInputChange = (event) => {
         setInputText(event.target.value);
@@ -21,17 +48,17 @@ const Chatbot = () => {
     const handleButtonClick = async () => {
         if (inputText.trim() === "") return;
 
-        // Add user's message to chat history
+        // Add patient's message to chat history
         const newPatientMessage = { sender: "patient", message: inputText };
         setChatHistory((prev) => [...prev, newPatientMessage]);
         setInputText("");
 
         try {
-            // Send request to the backend and get response
+            // Send request to backend for chatbot response
             const response = await axios.post("http://localhost:8000/chatResponse/", { message: inputText });
-            console.log(response)
+            console.log(response);
             const botMessage = response.data.response || "I'm here to help you.";
-            
+
             // Add bot's response to chat history
             const newBotMessage = { sender: "bot", message: botMessage };
             setChatHistory((prev) => [...prev, newBotMessage]);
@@ -41,8 +68,6 @@ const Chatbot = () => {
             const errorMessage = { sender: "bot", message: "There was an error. Please try again." };
             setChatHistory((prev) => [...prev, errorMessage]);
         }
-
-        // Clear input field
     };
 
     return (

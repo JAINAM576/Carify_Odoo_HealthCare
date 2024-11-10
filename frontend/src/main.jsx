@@ -28,8 +28,8 @@ import ReportAnalysis from './Pages/App/Report-analysis/reportAnalysis';
 import Profle from './Pages/App/Profile/Profile'
 import Schedule from './Pages/App/Schedule/Schecule';
 import Dashboard from './Pages/App/Dashboard/Dashboard';
-
-
+import Booking from './Pages/App/Booking/Booking';
+import DoctorProfile from './Pages/App/DoctorProfile/DocProfile';
 // router and routes
 const router = createBrowserRouter([
   {
@@ -39,13 +39,12 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        
+        index: true,
         element: <Home />,
        
       },
       {
         path: "/login",
-        index: true,
         element: <Login />,
       },
       {
@@ -54,34 +53,36 @@ const router = createBrowserRouter([
       },
       {
         path: "/signup",
-        index: true,
         element: <Signup />,
       },
        
       {
         path: "/chatbot",
-        index: true,
         element: <Chatbot />,
       },
       {
         path: "/report-analysis",
-        index: true,
         element: <ReportAnalysis />,
       },
       {
         path: "/profile/patient",
-        index: true,
         element: <Profle />,
       },
       {
         path: "/schedule",
-        index: true,
         element: <Schedule />,
       },
       {
         path: "/dashboard",
-        index: true,
         element: <Dashboard />,
+      },
+      {
+        path: "/booking",
+        element: <Booking />,
+      },
+      {
+        path: "/profile/doctor",
+        element: <DoctorProfile />,
       },
       {
         path: "*",

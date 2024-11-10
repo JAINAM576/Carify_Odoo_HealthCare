@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React,{ useEffect, useState } from "react";
 import { useLocation, Outlet } from "react-router-dom";
 import LoaderAnimation from "./Loader/LoaderAnimation";
 

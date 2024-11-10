@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Patientnav from "../Components/patientnav";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
-
 const ReportAnalysis = () => {
+    
     const [file, setFile] = useState(null);
     const [analysisResult, setAnalysisResult] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -70,7 +70,7 @@ if (localStorage.getItem("analysis")){
 
     return (
      <>
-    <Patientnav activeName="Report-analysis" />
+    <Patientnav activeName="Report-Analysis" />
     <div className="container mt-3">
         <h2 className="mb-3">Report Analysis</h2>
 

@@ -80,12 +80,7 @@ const AppointmentModal = ({ show, onClose, doctorId }) => {
           // setSlots(response.data.slots);
 
           // Simulating the response
-          const dummySlots = [
-            { slot_no: 1, time_range: '10:00 AM - 10:30 AM', availability: true },
-            { slot_no: 2, time_range: '11:00 AM - 11:30 AM', availability: false },
-            { slot_no: 3, time_range: '12:00 PM - 12:30 PM', availability: true },
-          ];
-          setSlots(dummySlots);
+
         } catch (error) {
           console.error("Error fetching slots:", error);
         }
@@ -94,12 +89,13 @@ const AppointmentModal = ({ show, onClose, doctorId }) => {
     }
   }, [show, doctorId, selectedDate]);
 
-  const handleConfirmAppointment = () => {
+  const handleConfirmAppointment = async() => {
     if (!selectedSlot || !description) {
       alert("Please select a slot and enter a description.");
       return;
     }
-
+    const response=await axios.post("http://localhost:8000/insertPatient/",{did:doctorId,sid:selectedSlot,desc:description,date:selectedDate},{withCredentials:true})
+console.log(response)
     // Simulate sending appointment data
     alert("Appointment booked successfully!");
     onClose(); // Close modal after successful booking
@@ -120,22 +116,31 @@ const AppointmentModal = ({ show, onClose, doctorId }) => {
   const handleDateChange=async (date)=>{
 setSelectedDate(date);
 const formattedDate = date.toISOString().split('T')[0]; 
+setSelectedDate(formattedDate)
 const slotData=await getSlots(doctorId)
 console.log(slotData)
 let sidArray=[]
-slotData.forEach((e)=>{
+slotData['data'].forEach((e)=>{
   sidArray.push(e[1])
 })
  try {
     const response = await axios.post('http://localhost:8000/checkAvailibility/', {
-        doctorId: selectedDoctorId,
+        doctorId: doctorId,
         date:formattedDate,
         sidArray:sidArray
 
       },
       {withCredentials: true,
     });
-    return response.data; 
+   let validateSlots=[]
+   console.log(response.data)
+   
+   slotData['data'].forEach((e)=>{
+   
+    validateSlots.push({slot_no:e[0],time_range:e[2],availability:response['data'][e[1]],slot_id:e[1]})
+   })
+   setSlots(validateSlots)
+
   } catch (error) {
     console.error("Error fetching slots:", error.response ? error.response.data : error.message);
     
@@ -162,20 +167,20 @@ slotData.forEach((e)=>{
             />
             {selectedDate && (
               <>
-                <p>Select an available slot for {doctorId} on {selectedDate.toLocaleDateString()}</p>
+                <p>Select an available slot for {doctorId} on {selectedDate}</p>
                 {Array.isArray(slots) && slots.length > 0 ? (
                   <Form>
                     {slots.map((slot) => (
                       <Form.Check 
-                        key={slot.slot_no}
+                        key={slot.slot_id}
                         type="radio"
-                        label={`${slot.time_range} - ${slot.availability ? 'Available' : 'Unavailable'}`}
+                        label={`${slot.time_range} - ${slot.availability ? 'Unavailable' : 'Available'}`}
                         name="slot"
-                        value={slot.slot_no}
-                        disabled={!slot.availability}
-                        onChange={() => setSelectedSlot(slot.slot_no)}
+                        value={slot.slot_id}
+                        disabled={slot.availability}
+                        onChange={() => setSelectedSlot(slot.slot_id)}
                         style={{
-                          backgroundColor: slot.availability ? 'green' : 'red',
+                          backgroundColor: slot.availability ? 'red' : 'green',
                           color: 'white',
                           marginBottom: '10px',
                         }}

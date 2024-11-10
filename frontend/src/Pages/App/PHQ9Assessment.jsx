@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Patientnav from "../App/Components/patientnav";
+
 const PHQ9Assessment = () => {
+    
     const questions = [
         "Little interest or pleasure in doing things",
         "Feeling down, depressed, or hopeless",
@@ -37,7 +39,7 @@ const PHQ9Assessment = () => {
 
     const [responses, setResponses] = useState(Array(questions.length).fill(0));
     const [difficultyResponse, setDifficultyResponse] = useState(0);
-    const [showResults, setShowResults] = useState(false); // State to control result visibility
+    const [showResults, setShowResults] = useState(false);
 
     const handleResponseChange = (index, value) => {
         const newResponses = [...responses];
@@ -48,19 +50,20 @@ const PHQ9Assessment = () => {
     const handleDifficultyChange = (value) => {
         setDifficultyResponse(value);
     };
-const calculateSeverity = (totalScore) => {
-    if (totalScore >= 0 && totalScore < 5) {
-        return "Minimal depression";
-    } else if (totalScore >= 5 && totalScore < 10) {
-        return "Mild depression";
-    } else if (totalScore >= 10 && totalScore < 15) {
-        return "Moderate depression";
-    } else if (totalScore >= 15 && totalScore < 20) {
-        return "Moderately severe depression";
-    } else {
-        return "Severe depression";
-    }
-};
+
+    const calculateSeverity = (totalScore) => {
+        if (totalScore >= 0 && totalScore < 5) {
+            return "Minimal depression";
+        } else if (totalScore >= 5 && totalScore < 10) {
+            return "Mild depression";
+        } else if (totalScore >= 10 && totalScore < 15) {
+            return "Moderate depression";
+        } else if (totalScore >= 15 && totalScore < 20) {
+            return "Moderately severe depression";
+        } else {
+            return "Severe depression";
+        }
+    };
 
     const calculateScore = () => {
         const totalScore = responses.reduce((acc, val) => acc + val, 0);
@@ -70,53 +73,161 @@ const calculateSeverity = (totalScore) => {
             severity,
             difficultyLevel: difficultyLevels[difficultyResponse],
             responses,
-            potentialMajorDepression: totalScore >= 15, // Criteria for major depression
-            potentialOtherDepression: totalScore >= 10 && totalScore < 15 // Criteria for other depression
+            potentialMajorDepression: totalScore >= 15,
+            potentialOtherDepression: totalScore >= 10 && totalScore < 15
         };
+    };
+
+    const generateRecommendations = (severity) => {
+        switch (severity) {
+            case "Minimal depression":
+                return [
+                    "Practice daily gratitude to lift your mood.",
+                    "Try to engage in a favorite hobby or activity.",
+                    "Stay active and exercise regularly to boost your energy."
+                ];
+            case "Mild depression":
+                return [
+                    "Take small steps to set and achieve daily goals.",
+                    "Consider mindfulness meditation for stress reduction.",
+                    "Connect with friends and family for social support."
+                ];
+            case "Moderate depression":
+                return [
+                    "Consider speaking with a therapist for personalized support.",
+                    "Establish a consistent sleep routine to improve your mood.",
+                    "Limit alcohol and caffeine, as they can impact mood."
+                ];
+            case "Moderately severe depression":
+                return [
+                    "Seek help from a mental health professional.",
+                    "Join a support group to connect with others facing similar challenges.",
+                    "Explore creative outlets like journaling or art for expression."
+                ];
+            case "Severe depression":
+                return [
+                    "Consult a licensed therapist or mental health professional.",
+                    "Seek immediate support if experiencing harmful thoughts.",
+                    "Consider speaking with a doctor about medical support options."
+                ];
+            default:
+                return [];
+        }
+    };
+
+    const generateExerciseVideos = (severity) => {
+        switch (severity) {
+            case "Minimal depression":
+                return [
+                    { title: "5-Minute Mindful Breathing", link: "https://www.youtube.com/embed/inpok4MKVLM" },
+                    { title: "Gentle Yoga for Relaxation", link: "https://www.youtube.com/embed/4C-gxOE0j7s" },
+                ];
+            case "Mild depression":
+                return [
+                    { title: "10-Minute Mindfulness Meditation", link: "https://www.youtube.com/embed/U9YKY7fdwyg" },
+                    { title: "Basic Yoga for Beginners", link: "https://www.youtube.com/embed/v7AYKMP6rOE" },
+                    { title: "Morning Stretch Routine", link: "https://youtu.be/g_tea8ZNk5A?si=hnIqE78CbeMYlU9N" }
+                ];
+            case "Moderate depression":
+                return [
+                    { title: "15-Minute Relaxation Meditation", link: "https://www.youtube.com/embed/ZToicYcHIOU" },
+                    { title: "Yoga for Stress Relief", link: "https://www.youtube.com/embed/4C-gxOE0j7s" },
+                    { title: "Active Stretching Routine", link: "https://youtu.be/g_tea8ZNk5A?si=hnIqE78CbeMYlU9N" }
+                ];
+            case "Moderately severe depression":
+                return [
+                    { title: "20-Minute Mindfulness Meditation", link: "https://www.youtube.com/embed/z6X5oEIg6Ak" },
+                    { title: "Yoga for Anxiety", link: "https://www.youtube.com/embed/4pLUleLdwY4" },
+                    { title: "Energizing Morning Routine", link: "https://www.youtube.com/embed/8DZktowZo_k" }
+                ];
+            case "Severe depression":
+                return [
+                    { title: "Guided Meditation for Deep Relaxation", link: "https://www.youtube.com/embed/Jyy0ra2WcQQ" },
+                    { title: "Yoga for Healing", link: "https://www.youtube.com/embed/4C-gxOE0j7s" },
+                    { title: "Restorative Stretch Routine", link: "https://www.youtube.com/embed/FyDQljKtWnI" }
+                ];
+            default:
+                return [];
+        }
+
     };
 
     const generateReport = () => {
         const results = calculateScore();
+        const recommendations = generateRecommendations(results.severity);
+        const exercises = generateExerciseVideos(results.severity);
 
-        let report = "\nPHQ-9 Assessment Report";
-        report += "\n" + "=".repeat(50);
+        return (
+            <div className="mt-4">
+                <div className="card shadow-lg">
+                    <div className="card-header bg-info text-white text-center">
+                        <h4>Assessment Results</h4>
+                    </div>
+                    <div className="card-body">
+                        <p className="text-center"><strong>Total Score:</strong> {results.totalScore}</p>
+                        <p className="text-center"><strong>Severity Level:</strong> {results.severity}</p>
+                        <p className="text-center"><strong>Functional Difficulty:</strong> {results.difficultyLevel}</p>
+                    </div>
+                </div>
+                <div className="card mt-4 shadow-lg">
+                    <div className="card-header bg-success text-white text-center">
+                        <h4>Personalized Recommendations</h4>
+                    </div>
+                    <div className="card-body">
+                        <ul>
+                            {recommendations.map((tip, index) => (
+                                <li key={index} className="mb-2">{tip}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+                <div className="card mt-4 shadow-lg">
+                    <div className="card-header bg-primary text-white text-center">
+                        <h4>Exercise Videos</h4>
+                    </div>
+                    <div className="card-body">
+                        <ul>
+                            {exercises.map((exercise, index) => (
+                                <li key={index} className="mb-3">
+                                    <strong>{exercise.title}</strong>
+                                    <div className="responsive-iframe-wrapper">
+                                        <iframe
+                                            className="responsive-iframe"
+                                            src={exercise.link}
+                                            title={exercise.title}
+                                            allowFullScreen
+                                        ></iframe>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
 
-        report += `\n\n<strong>Total Score:</strong> ${results.totalScore}`;
-        report += `\n<strong>Severity Level:</strong> ${results.severity}`;
-        report += `\n<strong>Functional Difficulty:</strong> ${results.difficultyLevel}`;
+                <a href="/chatbot" className='nav-link'>
+                    <div className='p-3 bg-myblue mt-4 rounded' style={{ cursor: "pointer" }}>
+                        <span className='mytitle'>consult online chatbuddy 🔗</span>
+                    </div>
+                </a>
 
-        report += "\n\n<strong>Detailed Responses:</strong>";
-        questions.forEach((question, index) => {
-            report += `\n${index + 1}. ${question}`;
-            report += `\n   Response: ${frequencyOptions[responses[index]]}`;
-        });
-
-        report += "\n\n<strong>Clinical Considerations:</strong>";
-        if (results.potentialMajorDepression) {
-            report += "\n- Consider Major Depressive Disorder";
-            report += "\n  (5 or more symptoms at 'Nearly every day' including at least one core symptom)";
-        } else if (results.potentialOtherDepression) {
-            report += "\n- Consider Other Depressive Disorder";
-            report += "\n  (2-4 symptoms at 'Nearly every day' including at least one core symptom)";
-        }
-
-        report += "\n\nNote: This questionnaire is a screening tool. A definitive diagnosis";
-        report += "\nshould be made by a qualified healthcare professional taking into";
-        report += "\naccount clinical observation and other relevant information.";
-
-        return report;
+                <div className="text-center mt-4">
+                    <small>
+                        Note: This is a screening tool, not a diagnostic instrument. For accurate diagnosis and support, please consult a mental health professional.
+                    </small>
+                </div>
+            </div>
+        );
     };
 
-    const results = calculateScore();
+
 
     return (
         <>
-        <Patientnav activeName="Mental-test"/>
-        <div className="container my-5">
-            <h2 className="mb-4 text-center">PHQ-9 Assessment</h2>
-            <p className="text-center mb-4">Over the last 2 weeks, how often have you been bothered by any of the following problems?</p>
+            <Patientnav activeName="Mental-Test" />
+            <div className="container my-5">
+                <h2 className="mb-4 text-center">PHQ-9 Assessment</h2>
+                <p className="text-center mb-4">Over the last 2 weeks, how often have you been bothered by any of the following problems?</p>
 
-            <div className="mb-4">
                 {questions.map((question, index) => (
                     <div key={index} className="mb-3">
                         <label className="form-label">{question}</label>
@@ -131,99 +242,37 @@ const calculateSeverity = (totalScore) => {
                         </select>
                     </div>
                 ))}
-            </div>
 
-            <div className="mb-4">
-                <p className="mb-3">If you checked off any problems, how difficult have these problems made it for you to do your work, take care of things at home, or get along with other people?</p>
-                {difficultyLevels.map((level, index) => (
-                    <div key={index} className="form-check">
-                        <input
-                            className="form-check-input"
-                            type="radio"
-                            name="difficulty"
-                            value={index}
-                            checked={difficultyResponse === index}
-                            onChange={() => handleDifficultyChange(index)}
-                        />
-                        <label className="form-check-label">
-                            {level}
-                        </label>
-                    </div>
-                ))}
-            </div>
-
-            <div className="d-flex justify-content-center mb-4">
-                <button
-                    className="btn btn-primary"
-                    onClick={() => setShowResults(true)} // Show results when clicked
-                >
-                    Check Results
-                </button>
-            </div>
-
-            {showResults && (
-                <div className="mt-4">
-                    <div className="card shadow-lg">
-                        <div className="card-header bg-info text-white text-center">
-                            <h4>Assessment Results</h4>
+                <div className="mb-4">
+                    <p>If you checked off any problems, how difficult have these problems made it for you?</p>
+                    {difficultyLevels.map((level, index) => (
+                        <div key={index} className="form-check">
+                            <input
+                                className="form-check-input"
+                                type="radio"
+                                name="difficulty"
+                                value={index}
+                                checked={difficultyResponse === index}
+                                onChange={() => handleDifficultyChange(index)}
+                            />
+                            <label className="form-check-label">{level}</label>
                         </div>
-                        <div className="card-body">
-                            <p className="text-center"><strong>Total Score:</strong> {results.totalScore}</p>
-                            <p className="text-center"><strong>Severity Level:</strong> {results.severity}</p>
-                            <p className="text-center"><strong>Functional Difficulty:</strong> {results.difficultyLevel}</p>
-                        </div>
-                    </div>
-
-                    <div className="card mt-4 shadow-lg">
-                        <div className="card-header bg-warning text-dark text-center">
-                            <h4>Detailed Report</h4>
-                        </div>
-                        <div className="card-body">
-                            <pre className="p-3" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                                <strong style={{ color: '#007bff' }}>Total Score:</strong> <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{results.totalScore}</span>
-                                <br />
-                                <strong style={{ color: '#007bff' }}>Severity Level:</strong> <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{results.severity}</span>
-                                <br />
-                                <strong style={{ color: '#007bff' }}>Functional Difficulty:</strong> <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{results.difficultyLevel}</span>
-                                <hr />
-                                <strong>Detailed Responses:</strong>
-                                <ul>
-                                    {questions.map((question, index) => (
-                                        <li key={index}>
-                                            <strong>{index + 1}. {question}</strong>
-                                            <br />
-                                            Response: <span style={{ color: '#28a745' }}>{frequencyOptions[responses[index]]}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <hr />
-                                <strong>Clinical Considerations:</strong>
-                                {results.potentialMajorDepression ? (
-                                    <div style={{ backgroundColor: '#ffcccc', padding: '10px', borderRadius: '5px' }}>
-                                        <ul>
-                                            <li>- Consider Major Depressive Disorder</li>
-                                            <li>(5 or more symptoms at 'Nearly every day' including at least one core symptom)</li>
-                                        </ul>
-                                    </div>
-                                ) : results.potentialOtherDepression ? (
-                                    <div style={{ backgroundColor: '#fff3cd', padding: '10px', borderRadius: '5px' }}>
-                                        <ul>
-                                            <li>- Consider Other Depressive Disorder</li>
-                                            <li>(2-4 symptoms at 'Nearly every day' including at least one core symptom)</li>
-                                        </ul>
-                                    </div>
-                                ) : null}
-                                <hr />
-                                <em style={{ fontSize: '0.9em', color: '#6c757d' }}>
-                                    Note: This questionnaire is a screening tool. A definitive diagnosis should be made by a qualified healthcare professional taking into account clinical observation and other relevant information.
-                                </em>
-                            </pre>
-                        </div>
-                    </div>
+                    ))}
                 </div>
-                
-            )}
-        </div>
+
+                <div className="d-flex justify-content-center mb-4">
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => setShowResults(true)}
+                    >
+                        Check Results
+                    </button>
+                </div>
+
+                {showResults && generateReport()}
+            </div>
+
+
         </>
     );
 };

@@ -1,48 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import DoctorNav from "../Components/doctornav";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Schedule = () => {
-    // State to hold slots data
-    const [slots, setSlots] = useState([
-        { slot_no: 1, time_range: '9:00 AM - 10:00 AM', max_patient: 10, status: 'present' },
-        { slot_no: 2, time_range: '10:00 AM - 11:00 AM', max_patient: 8, status: 'present' },
-        // Add more dummy slots if needed
-    ]);
-
-    // State for managing form inputs
+    const doctorId = 101; // Set doctor ID as a constant
+    const [slots, setSlots] = useState([]);
     const [timeRange, setTimeRange] = useState('');
     const [maxPatient, setMaxPatient] = useState('');
-    const [status, setStatus] = useState('present');  // Only 'present' option
+    const [status, setStatus] = useState('present'); // Only 'present' option
     const [slotNo, setSlotNo] = useState(null);  // Null for new slot, or slot number for update
 
+    // Fetch slots from the server
+    const fetchSlots = async () => {
+        try {
+    const response = await axios.post('http://localhost:8000/getSlots/', {
+       send:true
+      },
+      {withCredentials: true,
+    });
+    setSlots(response.data.data)
+    console.log(response.data.data)
+  } catch (error) {
+    console.error("Error fetching slots:", error.response ? error.response.data : error.message);
+    
+  }
+    };
+      // Fetch slot count from  the server
+    const fetchSlotCount = async () => {
+        try {
+    const response = await axios.post('http://localhost:8000/getSlotsCount/', {
+       send:true
+      },
+      {withCredentials: true,
+    });
+  
+    console.log(response.data)
+  } catch (error) {
+    console.error("Error fetching slots:", error.response ? error.response.data : error.message);
+    
+  }
+    };
+
+    // Use effect to fetch slots when the component mounts
+    useEffect(() => {
+        fetchSlots();
+        fetchSlotCount();
+    }, []);
+
     // Handler for adding/updating a slot
-    const handleAddSlot = () => {
+    const handleAddSlot = async () => {
         if (!timeRange || !maxPatient) {
             alert("Please fill in all fields.");
             return;
         }
 
         const newSlot = {
-            slot_no: slots.length + 1,  // Can be dynamic based on the current length of slots
+           slot_no: 4,
             time_range: timeRange,
             max_patient: parseInt(maxPatient),
             status: status
         };
 
-        // Add the new slot and sort by time range
-        const updatedSlots = [...slots, newSlot].sort((a, b) => {
-            return timeToMinutes(a.time_range.split(' - ')[0]) - timeToMinutes(b.time_range.split(' - ')[0]);
-        });
-
-        // Update state
-        setSlots(updatedSlots);
-        clearForm();
+        try {
+            const response = await axios.post('http://localhost:8000/slots/', newSlot, { withCredentials: true });
+            if (response.status === 200) {
+                console.log(response)
+                fetchSlots();  // Refresh the slot list
+                clearForm();
+            }
+        } catch (error) {
+            console.error("Error adding slot:", error);
+        }
     };
 
-    // Function to delete a slot by slot number
-    const handleDeleteSlot = (slotNo) => {
-        setSlots(slots.filter(slot => slot.slot_no !== slotNo));
+    // Handler for deleting a slot
+    const handleDeleteSlot = async (slotNo) => {
+        try {
+            const response = await axios.delete(`http://localhost:8000/slots/${slotNo}`, { withCredentials: true });
+            if (response.status === 200) {
+                fetchSlots();  // Refresh the slot list
+            }
+        } catch (error) {
+            console.error("Error deleting slot:", error);
+        }
     };
 
     // Function to start editing a slot
@@ -54,28 +95,29 @@ const Schedule = () => {
     };
 
     // Function to update a slot (e.g., changing its details)
-    const handleUpdateSlot = () => {
+    const handleUpdateSlot = async () => {
         if (!timeRange || !maxPatient) {
             alert("Please fill in all fields.");
             return;
         }
 
-        const updatedSlots = slots.map(slot => 
-            slot.slot_no === slotNo
-                ? { ...slot, time_range: timeRange, max_patient: parseInt(maxPatient), status: status }
-                : slot
-        );
+        const updatedSlot = {
+            slot_no: 4,
+            time_range: timeRange,
+            max_patient: parseInt(maxPatient),
+            status: status
+        };
 
-        // Re-sequence the slots
-        const reSequencedSlots = updatedSlots.map((slot, index) => ({
-            ...slot,
-            slot_no: index + 1  // Ensure slot numbers are sequential
-        }));
-
-        // Update state and clear form
-        setSlots(reSequencedSlots);
-        clearForm();
-        setSlotNo(null);
+        try {
+            const response = await axios.put(`/api/slots/${slotNo}`, updatedSlot, { withCredentials: true });
+            if (response.status === 200) {
+                fetchSlots();  // Refresh the slot list
+                clearForm();
+                setSlotNo(null);
+            }
+        } catch (error) {
+            console.error("Error updating slot:", error);
+        }
     };
 
     // Clear form inputs
@@ -84,27 +126,6 @@ const Schedule = () => {
         setMaxPatient('');
         setStatus('present');
     };
-
-    // Convert time range to minutes for sorting
-    // Convert time range to minutes for sorting with validation
-const timeToMinutes = (time) => {
-    const [hours, minutes] = time.split(':');
-
-    // Check if the hour is within a valid range (0 to 23)
-    if (parseInt(hours) > 23 || parseInt(hours) < 0) {
-        alert("Invalid time: hours must be between 00 and 23");
-        return 0;  // Return a fallback value
-    }
-
-    // Handle if minutes exceed 60
-    if (parseInt(minutes) >= 60 || parseInt(minutes) < 0) {
-        alert("Invalid time: minutes must be between 00 and 59");
-        return 0;  // Return a fallback value
-    }
-
-    return parseInt(hours) * 60 + parseInt(minutes);
-};
-
 
     return (
         <>
@@ -162,12 +183,12 @@ const timeToMinutes = (time) => {
                         <h4 className="card-title">Existing Slots</h4>
                         <ul className="list-group list-group-flush">
                             {slots.map((slot) => (
-                                <li key={slot.slot_no} className="list-group-item d-flex justify-content-between align-items-center">
+                                <li key={slot[0]} className="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <strong>Slot {slot.slot_no}</strong><br />
-                                        <strong>Time Range:</strong> {slot.time_range} <br />
-                                        <strong>Max Patients:</strong> {slot.max_patient} <br />
-                                        <strong>Status:</strong> <span className="badge bg-success">{slot.status}</span>
+                                        <strong>Slot {slot[0]}</strong><br />
+                                        <strong>Time Range:</strong> {slot[2]} <br />
+                                        <strong>Max Patients:</strong> {slot[3]} <br />
+                                        <strong>Status:</strong> <span className="badge bg-success">{slot[4]?"Yes":"No"}</span>
                                     </div>
                                     <div>
                                         <button
@@ -178,7 +199,7 @@ const timeToMinutes = (time) => {
                                         </button>
                                         <button
                                             className="btn btn-danger btn-sm"
-                                            onClick={() => handleDeleteSlot(slot.slot_no)}
+                                            onClick={() => handleDeleteSlot(slot[0])}
                                         >
                                             Delete Slot
                                         </button>

@@ -135,6 +135,30 @@ const PatientProfile = () => {
         },
     };
 
+    const handleSubmit = async () => {
+
+     
+       
+        try {
+            const response = await axios.get('http://localhost:8000/getProfileInfo/',{withCredentials:true});
+          console.log(response)
+          setPatient(response.data)
+        } catch (error) {
+            console.error('Error loging :', error);
+            // alert('Failed to login . Please try again.');
+        }
+    };
+    useEffect(()=>{
+        handleSubmit()
+    },[])
+
+      const handleLogout = () => {
+        Cookies.remove("email");
+        Cookies.remove("password");
+        Cookies.remove("role");
+        navigate("/login");
+    };
+
     return (
         <>
             <Patientnav activeName="Profile" />

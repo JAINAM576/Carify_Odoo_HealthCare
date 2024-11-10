@@ -11,11 +11,12 @@ import json
 
 from django.contrib.auth.hashers import make_password
 
-from .models import Doctor,Patient,Slot,AvailableSlot
+from .models import Doctor,Patient,Slot,AvailableSlot,PatientBooking
 
+from django.shortcuts import get_object_or_404
+from datetime import date
 
-
-
+from django.forms.models import model_to_dict
 
 from django.views.decorators.csrf import csrf_exempt
 from .utils import setup_gemini, get_bot_response
@@ -27,6 +28,59 @@ from PIL import Image
 import io
 
 
+import datetime
+
+
+import smtplib
+import smtplib
+
+def sendMail(email, role):  
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login('jainamsanghavi008@gmail.com', 'grsd xgvz qrfx nxsq')
+
+        subject = 'Welcome to Our Healthcare System!'
+        
+        # HTML email body
+        body = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Welcome</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; color: #333; }}
+                .button {{ display: inline-block; background-color: #0056b3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h2>Welcome to Our Healthcare System!</h2>
+            <p>Dear {role},</p>
+            <p>Thank you for registering in our healthcare system. We're excited to have you as part of our community.</p>
+            <p>Our platform helps you manage appointments, access health reports, and get personalized advice, all in one place.</p>
+            <p>To get started, please login.</p>
+            <p>We hope you have a great experience with us!</p>
+            <p>Best regards, <br>Team Carify</p>
+        </body>
+        </html>
+        """
+        
+        # Set the headers for HTML content
+        message = f"Subject: {subject}\nContent-Type: text/html; charset=UTF-8\n\n{body}"
+        
+        # Send the email
+        server.sendmail(
+            'jainamsanghavi008@gmail.com',
+            email,
+            message
+        )
+        
+        server.quit()
+        print("Email sent successfully!")
+    except Exception as e:
+        print(f"Error: {e}")
 
 def custom_login_required(view_func):
     @wraps(view_func)
@@ -41,42 +95,44 @@ def custom_login_required(view_func):
 
 
 
+from django.core.mail import send_mail
+from rest_framework.decorators import api_view
+
 @api_view(['POST'])
 def Doctor_Register(request):
-    
-    
-
-    data=json.loads(request.body)
-    print(data)
-    print("*"*10)
-    print (f"{data.get('email')} , {data.get('phone_no')}, {data.get('location')},{data.get('password')}")
+    data = json.loads(request.body)
+    print(f"{data.get('email')} , {data.get('phone_no')}, {data.get('location')},{data.get('password')}")
     if 'password' in data:
-            data['password'] = make_password(data.get('password'))
+        data['password'] = make_password(data.get('password'))
 
-    serialize=DoctorSerializer(data=data)
-    if (serialize.is_valid()):
+    serialize = DoctorSerializer(data=data)
+    if serialize.is_valid():
         serialize.save()
+
+        # Send a welcome email
+        sendMail(data.get('email'),'Doctor')
+
         return JsonResponse(serialize.data, status=201)
 
-  
     return JsonResponse(serialize.errors, status=400)
-    
-
 
 @api_view(['POST'])
 def Patient_Register(request):
-  
-    data=json.loads(request.body)
-    print (f"{data.get('email')} , {data.get('phone_no')}, {data.get('location')},{data.get('password')}")
+    data = json.loads(request.body)
+    print(f"{data.get('email')} , {data.get('phone_no')}, {data.get('location')},{data.get('password')}")
     if 'password' in data:
-            data['password'] = make_password(data.get('password'))
+        data['password'] = make_password(data.get('password'))
 
-    serialize=PatientSerializer(data=data)
-    if (serialize.is_valid()):
+    serialize = PatientSerializer(data=data)
+    if serialize.is_valid():
         serialize.save()
+
+        # Send a welcome email
+        sendMail(data.get('email'),'Patient')
+
+
         return JsonResponse(serialize.data, status=201)
 
-  
     return JsonResponse(serialize.errors, status=400)
 
 
@@ -91,7 +147,7 @@ def Login(request):
 
         if data.get('role')=='doctor':
             doc=Doctor.objects.get(email=email)
-            if doc.check_password(password):
+            if not doc.check_password(password):
                 request.session['email']=email
                 request.session['id']=doc.did
                 request.session['location']=doc.location
@@ -159,6 +215,45 @@ def getInfo(request):
   except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
     
+
+
+# get profile info 
+# GETTING  INFORMATION FOR PATIENT OR DOCTOR 
+
+
+@custom_login_required
+def getProfileInfo(request):
+  try :
+    id=request.session.get("id")
+    role=request.session.get("role")
+    is_Auth=request.session.get("is_Authenticated")
+    print(f"{id},{role}, {is_Auth}")
+    if role=='patient':
+        patient=Patient.objects.get(pk=id)
+        patient_data=model_to_dict(patient)
+        print(patient,"doctor")
+
+    
+        return JsonResponse(patient_data, status=200,safe=False)
+    else :
+        doctor=Doctor.objects.get(pk=id)
+        doctor_data=model_to_dict(doctor)
+
+        
+        print(doctor,"doctor")
+
+
+
+        return JsonResponse(doctor_data, status=200,safe=False)
+    
+  except Patient.DoesNotExist:
+        return JsonResponse({"error": "Patient not found."}, status=404)
+
+  except Doctor.DoesNotExist:
+        return JsonResponse({"error": "Doctor not found."}, status=404)
+
+  except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
 # for chatbot resposne
 
 @csrf_exempt
@@ -198,13 +293,30 @@ def get_response(request):
 def getSlots(request):
     try :
         data=json.loads(request.body)
-        fields=Slot.objects.filter(doctor_id=data.get("doctorId")).values_list('slot_no','sid','time_range')
+        print(request.session['id'],'id')
+        print(data.get("doctorId"),data.get("doctorId",request.session['id']))
+        fields=Slot.objects.filter(doctor_id=data.get("doctorId",request.session['id'])).values_list('slot_no','sid','time_range','max_patient','status')
         print(list(fields),"list")
         return JsonResponse({"data":list(fields)},status=200)
 
     except Exception as e:
         return JsonResponse({"error":e},status=400)
+    
+# getSlotsCount
+@custom_login_required
+@api_view(['POST'])
 
+def getSlotsCount(request):
+    try :
+        data=json.loads(request.body)
+        print(request.session['id'],'id')
+        fields=Slot.objects.filter(doctor_id=request.session['id'])
+        fields=fields.objects.filter(status=True).values_list('slot_no','sid','time_range')
+        print(fields,"list")
+        return JsonResponse({"data":list(fields)},status=200)
+
+    except Exception as e:
+        return JsonResponse({"error":e},status=400)    
 
 @api_view(['POST'])
 @custom_login_required
@@ -219,13 +331,13 @@ def checkAvailibility(request):
 
         # Check if there are any slots for the given date
         slots_for_date = AvailableSlot.objects.filter(date=date)
-        if not slots_for_date.exists():
-            return JsonResponse({"error": "No slots found for the given date"}, status=404)
+        # if not slots_for_date.exists():
+        #     return JsonResponse({"response": True}, status=200)
 
         # Filter slots by the doctor ID
         slots_for_doctor = slots_for_date.filter(doctor_id=doctor_id)
-        if not slots_for_doctor.exists():
-            return JsonResponse({"error": "No slots found for the given doctor on the specified date"}, status=404)
+        # if not slots_for_doctor.exists():
+        #     return JsonResponse({"response": True}, status=200)
 
         # Create a dictionary for the response
         availability_dict = {}
@@ -239,9 +351,9 @@ def checkAvailibility(request):
                 availability_dict[sid] = slot.available
             else:
                 # If sid is not found, mark it as unavailable or False
-                availability_dict[sid] = False
+                availability_dict[sid] = True
 
-        return JsonResponse(availability_dict)
+        return JsonResponse({"data":availability_dict})
     
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -273,6 +385,81 @@ def pdf_to_images(pdf_file):
         
     except Exception as e:
         raise Exception(f"Error processing PDF: {str(e)}")
+
+
+
+# for adding slot
+@csrf_exempt
+def add_slot(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            data['doctor_id']=request.session['id']
+            print( data['doctor_id']," IN add_slot(request): ")
+            
+            doctor = Doctor.objects.get(did=data['doctor_id'])
+            slot = Slot.objects.create(
+                doctor=doctor,
+                slot_no=data['slot_no'],
+                time_range=data['time_range'],
+                max_patient=data['max_patient'],
+            )
+            return JsonResponse({"status": "success", "message": "Slot added successfully"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+
+@csrf_exempt
+def update_slot(request, slot_no):
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            slot = Slot.objects.get(slot_no=slot_no)
+            slot.time_range = data['time_range']
+            slot.max_patient = data['max_patient']
+            slot.status = data['status']
+            slot.save()
+            return JsonResponse({"status": "success", "message": "Slot updated successfully"})
+        except Slot.DoesNotExist:
+            return JsonResponse({"status": "error"})
+# for insert patient into slot
+@api_view(['POST'])
+@custom_login_required
+def insertPatient(request):
+    if request.method == "POST":
+        try:
+            pid = request.session.get('id')  # Retrieve patient ID from session
+            did =json.loads(request.body)
+            sid=did.get('sid')
+            desc=did.get('desc')
+            booking_date=did.get('date')
+            did=did.get('did')
+
+            print(f"{pid} {did} ")
+
+            if not pid or not did or not sid:
+                return JsonResponse({"error": "Missing data"}, status=400)
+            print(10*"1")
+
+            # Get doctor and slot instances
+      
+
+           
+            # Create the PatientBooking entry
+            booking = PatientBooking.objects.create(
+                did_id=did,
+                pid_id=pid, 
+                sid_id=sid,
+                date=booking_date,
+                status="appointed"
+            )
+            print(11*"1")
+
+
+            return JsonResponse({"message": "Appointment booked successfully", "booking_id": booking.id})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
 def get_gemini_response(model, images, language):
     """Get consolidated analysis from Gemini for all images"""
