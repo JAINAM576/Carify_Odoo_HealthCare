@@ -236,6 +236,10 @@ body {
     height: 100%;
     border: 0;
 }
+.slotdiv{
+    z-index: 0;
+    
+}
 
 @media screen and (max-width: 1200px) {
 

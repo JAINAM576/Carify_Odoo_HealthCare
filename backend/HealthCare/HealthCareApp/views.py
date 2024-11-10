@@ -82,6 +82,47 @@ def sendMail(email, role):
     except Exception as e:
         print(f"Error: {e}")
 
+# utils.py or views.py
+
+from django.core.mail import EmailMultiAlternatives
+
+def send_medical_tips_email(user_email):
+
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login('jainamsanghavi008@gmail.com', 'grsd xgvz qrfx nxsq')
+
+    # Step 1: Configure Gemini API and generate health tips
+    model = setup_gemini()
+    prompt="Provide general 5 medical and health tips for daily well-being. and please give normal text"
+    health_tips = model.generate_content(prompt)
+
+    # Extract the generated tips
+    
+    
+    # Step 2: Construct HTML body as a string
+    html_content = f"""
+    <html>
+        <body>
+            <h1 style="color: #4CAF50;">Daily Medical Tips</h1>
+            <p>Here are some useful medical tips for your health and well-being:</p>
+            <ul>
+                {''.join(f'<li>{tip}</li>' for tip in health_tips)}
+            </ul>
+            <p>Stay healthy and take care!</p>
+        </body>
+    </html>
+    """
+
+    # Step 3: Prepare and send the email
+    subject = "Your Daily Medical Tips"
+    message = f"Subject: {subject}\nContent-Type: text/html; charset=UTF-8\n\n{html_content}"
+    server.sendmail(
+            'jainamsanghavi008@gmail.com',
+            user_email,
+            message
+        )
+
 def custom_login_required(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
@@ -129,6 +170,7 @@ def Patient_Register(request):
 
         # Send a welcome email
         sendMail(data.get('email'),'Patient')
+        send_medical_tips_email(data.get('email'))
 
 
         return JsonResponse(serialize.data, status=201)

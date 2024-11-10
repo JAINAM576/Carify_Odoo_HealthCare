@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Doctornav from "../Components/doctornav";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -11,23 +10,41 @@ const Booking = () => {
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    // Fetch slots data by date
+    // Dummy data for slots
+    const dummySlots = [
+        {
+            slotId: 1,
+            time: "09:00 AM - 10:00 AM",
+            available: true,
+            patients: [
+                { pid: 1, name: "John Doe", description: "Consultation", status: "pending" },
+                { pid: 2, name: "Jane Smith", description: "Follow-up", status: "pending" }
+            ]
+        },
+        {
+            slotId: 2,
+            time: "10:00 AM - 11:00 AM",
+            available: false,
+            patients: [
+                { pid: 3, name: "Mark Wilson", description: "Routine checkup", status: "appointed" }
+            ]
+        },
+        {
+            slotId: 3,
+            time: "11:00 AM - 12:00 PM",
+            available: true,
+            patients: []
+        }
+    ];
+
+    // Fetch slots data by date (using dummy data here)
     const fetchSlots = async (date) => {
         setLoading(true);
-        try {
-            const formattedDate = date.toISOString().split("T")[0];
-            const response = await axios.get(`/api/slots?did=${doctorId}&date=${formattedDate}`);
-            if (response.status === 200 && Array.isArray(response.data)) {
-                setSlots(response.data);
-            } else {
-                console.error("Failed to fetch slot data or received non-array data");
-                setSlots([]); // Ensure slots is set to an array if data is invalid
-            }
-        } catch (error) {
-            console.error("Error fetching slots:", error);
-            setSlots([]); // Set to an empty array on error to avoid map issues
-        }
-        setLoading(false);
+        // Simulate API call
+        setTimeout(() => {
+            setSlots(dummySlots);
+            setLoading(false);
+        }, 1000);
     };
 
     useEffect(() => {
@@ -39,45 +56,20 @@ const Booking = () => {
         if (confirmed) {
             const doubleConfirmed = window.confirm("Please confirm again to change availability.");
             if (doubleConfirmed) {
-                try {
-                    const response = await axios.post('/api/slot-availability', {
-                        did: doctorId,
-                        sid: slotId,
-                        available: !currentAvailability
-                    });
-                    if (response.status === 200) {
-                        fetchSlots(selectedDate); // Refresh the slots data
-                    }
-                } catch (error) {
-                    console.error("Error updating slot availability:", error);
-                }
+                // Simulate updating availability
+                setSlots((prevSlots) =>
+                    prevSlots.map(slot =>
+                        slot.slotId === slotId
+                            ? { ...slot, available: !currentAvailability }
+                            : slot
+                    )
+                );
             }
         }
     };
 
     const handleAppoint = async (pid, sid) => {
-        try {
-            const response = await axios.post('/api/appoint', { did: doctorId, pid, sid });
-            if (response.status === 200) {
-                updatePatientStatus(pid, sid, 'appointed');
-            }
-        } catch (error) {
-            console.error("Error appointing patient:", error);
-        }
-    };
-
-    const handleReject = async (pid, sid) => {
-        try {
-            const response = await axios.post('/api/reject', { did: doctorId, pid, sid });
-            if (response.status === 200) {
-                updatePatientStatus(pid, sid, 'rejected');
-            }
-        } catch (error) {
-            console.error("Error rejecting patient:", error);
-        }
-    };
-
-    const updatePatientStatus = (pid, sid, newStatus) => {
+        // Simulate appointment action
         setSlots((prevSlots) =>
             prevSlots.map(slot =>
                 slot.slotId === sid
@@ -85,7 +77,25 @@ const Booking = () => {
                         ...slot,
                         patients: slot.patients.map(patient =>
                             patient.pid === pid
-                                ? { ...patient, status: newStatus }
+                                ? { ...patient, status: "appointed" }
+                                : patient
+                        )
+                    }
+                    : slot
+            )
+        );
+    };
+
+    const handleReject = async (pid, sid) => {
+        // Simulate rejection action
+        setSlots((prevSlots) =>
+            prevSlots.map(slot =>
+                slot.slotId === sid
+                    ? {
+                        ...slot,
+                        patients: slot.patients.map(patient =>
+                            patient.pid === pid
+                                ? { ...patient, status: "rejected" }
                                 : patient
                         )
                     }
@@ -98,21 +108,27 @@ const Booking = () => {
         <>
             <Doctornav activeName="Booking" />
             <div className="container py-3">
-                <div className="date-picker mb-3">
-                    <label><strong>Select Date: </strong></label>
-                    <DatePicker
-                        selected={selectedDate}
-                        onChange={(date) => setSelectedDate(date)}
-                        dateFormat="yyyy-MM-dd"
-                        className="form-control"
-                    />
+                <div className="row " >
+                    <div className="col-12">
+                        <div className="date-picker" >
+                            <label><strong>Select Date: </strong></label>
+                            <DatePicker
+                                selected={selectedDate}
+                                onChange={(date) => setSelectedDate(date)}
+                                dateFormat="yyyy-MM-dd"
+                                className="form-control"
+                               
+                            />
+                        </div>
+                    </div>
                 </div>
+                
                 {loading ? (
                     <p>Loading slots...</p>
                 ) : (
                     Array.isArray(slots) && slots.length > 0 ? (
                         slots.map((slot) => (
-                            <div key={slot.slotId} className="slotdiv mb-3">
+                            <div key={slot.slotId} className="slotdiv mb-3" >
                                 <div className="slotno">
                                     <span className="mytitle">Slot - {slot.slotId} : {slot.time}</span>
                                     <button
@@ -124,7 +140,6 @@ const Booking = () => {
                                         className="toggleappoint"
                                         onClick={() => handleToggleAvailability(slot.slotId, slot.available)}
                                     >
-                                        {slot.available ? "Available" : "Not Available"}
                                     </button>
                                 </div>
                                 <div className="slotinfo">

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Col, Row, Container } from 'react-bootstrap';
-import { Bar, Line } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement } from 'chart.js';
 import Doctornav from "../Components/doctornav";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from 'react-router-dom';
 
 // Register chart.js components
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, ArcElement);
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -47,9 +47,10 @@ const Dashboard = () => {
         { did: 1, pid: 104, sid: 8, date: '2024-11-01', status: 'rejected' },
       ]);
       setReports([
-        { pid: 101, did: 1, link: 'https://example.com/report/101' },
-        { pid: 102, did: 2, link: 'https://example.com/report/102' },
-        { pid: 103, did: 1, link: 'https://example.com/report/103' },
+        { pid: 101, did: 1, link: 'https://example.com/report/101', reason: 'Medical', },
+        { pid: 102, did: 2, link: 'https://example.com/report/102', reason: 'Consultation', },
+        { pid: 103, did: 1, link: 'https://example.com/report/103', reason: 'Medical', },
+        { pid: 104, did: 1, link: 'https://example.com/report/104', reason: 'Consultation', },
       ]);
     }
   }, [isAuthenticated]);
@@ -78,6 +79,36 @@ const Dashboard = () => {
       setReportSummary(summary);
     }
   }, [patientsBookings, reports]);
+
+  // Pie chart data for report reasons
+  // Updated report reasons data with more categories
+  const reportReasonData = {
+    labels: ['Medical', 'Consultation', 'Surgery', 'Follow-up', 'Emergency', 'Routine Checkup'],
+    datasets: [
+      {
+        label: 'Reports by Reason',
+        data: [4, 3, 2, 5, 1, 4], // Count of each reason, update as per your actual data
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.2)', // Medical
+          'rgba(255, 99, 132, 0.2)', // Consultation
+          'rgba(54, 162, 235, 0.2)', // Surgery
+          'rgba(255, 159, 64, 0.2)', // Follow-up
+          'rgba(153, 102, 255, 0.2)', // Emergency
+          'rgba(255, 206, 86, 0.2)'  // Routine Checkup
+        ],
+        borderColor: [
+          'rgba(75, 192, 192, 1)', // Medical
+          'rgba(255, 99, 132, 1)', // Consultation
+          'rgba(54, 162, 235, 1)', // Surgery
+          'rgba(255, 159, 64, 1)', // Follow-up
+          'rgba(153, 102, 255, 1)', // Emergency
+          'rgba(255, 206, 86, 1)'  // Routine Checkup
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
 
   const bookingChartData = {
     labels: ['2024-11-01', '2024-11-02', '2024-11-03'],
@@ -162,6 +193,8 @@ const Dashboard = () => {
           </Col>
         </Row>
 
+
+
         {/* Reports Summary */}
         <Row className="mb-4">
           <Col md={12}>
@@ -179,6 +212,18 @@ const Dashboard = () => {
                       </Card>
                     </Col>
                   ))}
+                  {/* Reports Reason Summary (Pie Chart) */}
+                  <Row className="mb-4">
+                    <Col md={6}>
+                      <Card className="mb-4">
+                        <Card.Body>
+                          <Card.Title>Report Reasons</Card.Title>
+                          <Pie data={reportReasonData} />
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  </Row>
+                  
                 </Row>
               </Card.Body>
             </Card>
